@@ -13,7 +13,7 @@ from pyvirtualdisplay import Display
 # For html paser
 from bs4 import BeautifulSoup
 # For Args
-import configparser
+import argparse
 # For DB access
 import db_control
 import sqlite3
@@ -182,44 +182,52 @@ def analyzeForFTS(soup, toMailList):
 # start from here
 if __name__ == "__main__":
 
-    if os.path.exists(authConf) is False:
-        printTime("config file Error !!")
-        print("Error ! no config file auth.cfg, run initConfig.py first !!")
-        exit(1)
+    # get the arguments from command line                     
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-f', '--fromaddr',                 \
+                        default='mail.walker.shi@gmail.com',\
+                        help="send from email address.")
+    parser.add_argument('-p', '--fromaddrpw',               \
+                        default = 'RedHat1!',               \
+                        help="password of the send from email address.") 
+    parser.add_argument('-u','--rhuser',                           \
+                        default = 'rhn-support-wenshi',     \
+                        help="RH account to access unified web site")     
+    parser.add_argument("rhpw",                             \
+                        help="password for RH account")                   
+    args = parser.parse_args()                                
+    args = vars(args) 
 
-    config = configparser.RawConfigParser()
-    config.read(authConf) 
+    FROM_ADDR   =args['fromaddr']
+    FROM_ADDR_PW=args['fromaddrpw']
+    RH_ADDR     =args['rhuser']
+    RH_ADDR_PW  =args['rhpw']
 
-    FROM_ADDR=config["config"]['fromAddr']
-    FROM_ADDR_PW=config['config']['fromAddrPW']
-    RH_ADDR=config['config']['rhuser']
-    RH_ADDR_PW=config['config']['rhpass']
+    print(FROM_ADDR,FROM_ADDR_PW,RH_ADDR,RH_ADDR_PW)
 
     # make a virtual display for headless broswer
     display = Display(visible=0, size=(1280, 720))
     display.start()
 
+    # TODO Read from a prieset volume
     # read sent case from file    
-    try:
-        with open('/tmp/newCaseSent.file', 'rb') as fp:
-            newCaseSent = pickle.load(fp)
-        with open('/tmp/ftsCaseSent.file', 'rb') as fp:
-            ftsCaseSent = pickle.load(fp)
-    except:
-        # this will happen at first run
-        pass
+    ## try:
+    ##     with open('/tmp/newCaseSent.file', 'rb') as fp:
+    ##         newCaseSent = pickle.load(fp)
+    ##     with open('/tmp/ftsCaseSent.file', 'rb') as fp:
+    ##         ftsCaseSent = pickle.load(fp)
+    ## except:
+    ##     # this will happen at first run
+    ##     pass
 
     caseSearch()
      
+    # TODO write to a prieset volume
     # save sent case to file    
-    with open('/tmp/newCaseSent.file', 'wb') as fp:
-        pickle.dump(newCaseSent, fp)
-    with open('/tmp/ftsCaseSent.file', 'wb') as fp:
-        pickle.dump(ftsCaseSent, fp)
+    ## with open('/tmp/newCaseSent.file', 'wb') as fp:
+    ##     pickle.dump(newCaseSent, fp)
+    ## with open('/tmp/ftsCaseSent.file', 'wb') as fp:
+    ##     pickle.dump(ftsCaseSent, fp)
 
     # stop the virtual display
     display.stop()
-
-    # cleanup
-    os.system("killall Xvfb");
-    os.system("killall firefox");

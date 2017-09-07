@@ -3,22 +3,14 @@ FROM fedora:26
 
 MAINTAINER "Wenhan Shi" <wenshi@redhat.com>
 
- RUN yum update -y; yum clean all
+RUN yum update -y; yum clean all
 
 # Install needed packages 
 RUN yum -y install firefox \ 
                    xorg-x11-server-Xvfb \
                    xorg-x11-fonts-Type1 \ 
                    xorg-x11-fonts-75dpi \
-                   cronie               \
-                   httpd                \
-                   wget                 \
-                   mod_wsgi             \
-                   systemd
-
-# start services
-RUN systemctl enable httpd.service
-RUN systemctl enable crond.service
+                   redhat-rpm-config 
 
 # Set the working directory to /app
 WORKDIR /app
@@ -31,7 +23,6 @@ ADD https://github.com/mozilla/geckodriver/releases/download/v0.18.0/geckodriver
 RUN tar xf /app/geckodriver-v0.18.0-linux64.tar.gz -C /usr/local/bin # geckodriver
 RUN mkdir /etc/freshcase
 RUN mv ecs.db /etc/freshcase
-RUN cp www/* /var/www/html/
 
 # Install requirements for python
 RUN pip3 install -r requirements.txt
@@ -42,9 +33,7 @@ EXPOSE 80
 # Define environment variable
 ENV NAME ahFreshCase
 
-RUN cat crontab >> /etc/crontab
-
 # Run ./initConfig.py when the container launches
-# ENTRYPOINT ["./initConfig.py"]
+ENTRYPOINT ["/app/ahFreshCase.py"]
 
-CMD ["/usr/sbin/init"]
+#CMD ["/usr/sbin/init"]

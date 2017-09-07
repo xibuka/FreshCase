@@ -19,7 +19,7 @@ def apacIsWorking():
     # apac team is working between 22:00 - 10:00 in UTC
     if now.hour > 10 and now.hour < 22:
         return False
-    else
+    else:
         return True
 
 def send(html_str, caseType, toList, fromAddr, fromAddrPW):
@@ -38,7 +38,11 @@ def send(html_str, caseType, toList, fromAddr, fromAddrPW):
     msg.attach(MIMEText(html_str, 'html')) # plain will send plain text
 
     # send the message
-    server.sendmail(fromAddr, toList, msg.as_string())
+    try:
+        server.sendmail(fromAddr, toList, msg.as_string())
+    except:
+        print("failed to send mail")
+        pass
 
     # logout
     server.quit()
